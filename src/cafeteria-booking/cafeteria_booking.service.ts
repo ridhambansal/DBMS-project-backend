@@ -18,7 +18,7 @@ export class CafeteriaBookingService {
         host: '127.0.0.1',
         port: 3306,
         user: 'root',
-        password: 'Utkarsh321',
+        password: 'Reaper@2103',
         database: 'office_management',
         waitForConnections: true,
         connectionLimit: 10,
