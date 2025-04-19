@@ -141,4 +141,36 @@ export class CafeteriaBookingService {
     throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async getCafes(): Promise<
+    { name: string; cuisine: string; contact_number: string; floor_number: number }[]
+  > {
+    const [rows] = await this.pool.execute<RowDataPacket[]>(
+      `SELECT name, cuisine, contact_number, floor_number FROM Cafe`
+    );
+    return rows as any;
+  }
+
+
+  async getBookingsByUser(userId: number): Promise<
+    { booking_id: number;
+      cafe_name: string;
+      booking_date: string;
+      details: string;
+    }[]
+  > {
+    const [rows] = await this.pool.execute<RowDataPacket[]>(
+      `
+      SELECT b.booking_id,
+             cb.cafe_name,
+             b.booking_date,
+             b.details
+        FROM Booking b
+        JOIN CafeBooking cb ON b.booking_id = cb.booking_id
+       WHERE b.user_id = ?
+      `,
+      [userId],
+    );
+    return rows as any;
+  }
 }

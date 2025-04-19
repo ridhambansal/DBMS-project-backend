@@ -7,6 +7,8 @@ import {
     Body,
     Param,
     Patch,
+    Get,
+    Query,
   } from '@nestjs/common';
   import { CafeteriaBookingService } from './cafeteria_booking.service';
   import { CreateCafeteriaBookingDto } from './dto/create-cafeteria_booking.dto';
@@ -28,6 +30,11 @@ import { UpdateCafeteriaBookingDto } from './dto/update-cafeteria_booking.dto';
     async checkAvailability(@Body() dto: CheckCafeAvailabilityDto) {
       return this.svc.isAvailable(dto);
     }
+
+    @Get('cafes')
+  async fetchCafes() {
+    return this.svc.getCafes();
+  }
   
     @Delete(':id')
     async cancel(
@@ -36,6 +43,13 @@ import { UpdateCafeteriaBookingDto } from './dto/update-cafeteria_booking.dto';
     ) {
       return this.svc.cancelBooking(+id, dto.user_id);
     }
+
+    @Get('bookings')
+  async listBookings(
+    @Query('user_id') userId: string
+  ) {
+    return this.svc.getBookingsByUser(+userId);
+  }
 
     @Patch(':id')
     update(
