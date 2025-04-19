@@ -13,4 +13,7 @@ export class UpdateCafeteriaBookingDto {
 
   @ApiPropertyOptional({ description: 'New details text' })
   details?: string;
+
+  @ApiPropertyOptional({ description: 'Name of the cafe' })
+ cafe_name?: string;
 }

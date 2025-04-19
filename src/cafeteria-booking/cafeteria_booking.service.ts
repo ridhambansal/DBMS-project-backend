@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { createPool, Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { CheckCafeAvailabilityDto } from './dto/check-availability.dto';
 import { CreateCafeteriaBookingDto } from './dto/create-cafeteria_booking.dto';
@@ -18,7 +18,7 @@ export class CafeteriaBookingService {
         host: '127.0.0.1',
         port: 3306,
         user: 'root',
-        password: 'Reaper@2103',
+        password: 'Utkarsh321',
         database: 'office_management',
         waitForConnections: true,
         connectionLimit: 10,
@@ -35,6 +35,8 @@ export class CafeteriaBookingService {
       // NOTE: MySQL procedures return an array of result‑sets;
       const d = new Date(dto.booking_date);
     const mysqlDateStr = d.toISOString().slice(0, 19).replace('T', ' '); 
+
+    await this.assertAvailable(dto.cafe_name, mysqlDateStr);
       // the first one is our SELECT at the end of the proc.
       const [rows] = await this.pool.query(
         'CALL BookCafe(?, ?, ?, ?)',
@@ -49,12 +51,39 @@ export class CafeteriaBookingService {
       }
   }
 
+  private async assertAvailable(
+       cafe_name: string,
+       mysqlDate: string,
+       excludeBookingId?: number,
+     ) {
+       const params: any[] = [cafe_name, mysqlDate];
+       let sql = `
+         SELECT COUNT(*) AS cnt
+           FROM Booking b
+           JOIN CafeBooking cb ON b.booking_id = cb.booking_id
+          WHERE cb.cafe_name = ?
+            AND b.booking_date = ?
+       `;
+       if (excludeBookingId) {
+         sql += ' AND b.booking_id <> ?';
+         params.push(excludeBookingId);
+       }
+       const [rows] = await this.pool.execute<RowDataPacket[]>(sql, params);
+       if ((rows[0]?.cnt as number) > 0) {
+         throw new ConflictException('That café slot is already booked');
+       }
+     }
+
   async updateBooking(
     bookingId: number,
     dto: UpdateCafeteriaBookingDto,
   ): Promise<{ success: boolean }> {
     const fields: string[] = [];
     const params: any[]   = [];
+
+    if (!dto.cafe_name) {
+      throw new BadRequestException('cafe_name is required when updating booking_date');
+    }
 
     // convert an ISO date to "YYYY-MM-DD HH:MM:SS"
     if (dto.booking_date) {
@@ -63,6 +92,8 @@ export class CafeteriaBookingService {
         .toISOString()
         .slice(0, 19)
         .replace('T', ' ');
+
+        await this.assertAvailable(dto.cafe_name , mysqlDate, bookingId);
       fields.push('booking_date = ?');
       params.push(mysqlDate);
     }
