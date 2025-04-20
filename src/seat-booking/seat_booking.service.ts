@@ -4,7 +4,7 @@ import {
     BadRequestException,
     NotFoundException,
   } from '@nestjs/common';
-  import { Pool } from 'mysql2/promise';
+  import { Pool, RowDataPacket } from 'mysql2/promise';
 import { DatabaseService } from 'src/database/database.service';
   import { CreateSeatBookingDto } from './dto/create-seat_booking.dto';
   import { UpdateSeatBookingDto } from './dto/update-seat_booking.dto';
@@ -283,6 +283,28 @@ import { DatabaseService } from 'src/database/database.service';
       } finally {
         conn.release();
       }
+    }
+
+    async findAllByUser(userId: number): Promise<any[]> {
+      const sql = `
+        SELECT
+          b.booking_id,
+          sb.seat_number,
+          b.booking_date,
+          b.details
+        FROM Booking b
+        JOIN SeatBooking sb ON b.booking_id = sb.booking_id
+        WHERE b.user_id = ?
+        ORDER BY b.booking_date DESC
+      `;
+      const [rows] = await this.databaseService.execute<RowDataPacket[]>(sql, [userId]);
+  
+      // Optional: throw if no bookings found
+      // if (!rows.length) {
+      //   throw new NotFoundException(`No seat bookings found for user ${userId}`);
+      // }
+  
+      return rows;
     }
   }
   

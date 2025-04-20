@@ -6,6 +6,7 @@ import {
     Patch,
     Param,
     Delete,
+    ParseIntPipe,
   } from '@nestjs/common';
   import { SeatBookingService } from './seat_booking.service';
   import { CreateSeatBookingDto } from './dto/create-seat_booking.dto';
@@ -42,5 +43,12 @@ import {
     remove(@Param('id') id: string) {
       return this.svc.remove(+id);
     }
+
+    @Get('user/:userId')
+  async getByUser(
+    @Param('userId', ParseIntPipe) userId: number
+  ) {
+    return this.svc.findAllByUser(userId);
+  }
   }
   
