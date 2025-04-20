@@ -5,6 +5,7 @@ import {
     NotFoundException,
   } from '@nestjs/common';
   import { Pool } from 'mysql2/promise';
+import { DatabaseService } from 'src/database/database.service';
   import { CreateSeatBookingDto } from './dto/create-seat_booking.dto';
   import { UpdateSeatBookingDto } from './dto/update-seat_booking.dto';
 
@@ -12,7 +13,7 @@ import {
 
   @Injectable()
   export class SeatBookingService {
-    constructor(@Inject('DATABASE_POOL') private pool: Pool) {}
+    constructor(private databaseService: DatabaseService) {}
 
 
 
@@ -31,7 +32,7 @@ import {
       }
   
     async create(dto: CreateSeatBookingDto) {
-      const conn = await this.pool.getConnection();
+      const conn = await this.databaseService.getConnection();
       try {
         await conn.beginTransaction();
   
@@ -91,7 +92,7 @@ import {
     }
   
     async findAll() {
-      const [rows] = await this.pool.query(
+      const rows = await this.databaseService.query(
         `SELECT sb.booking_id,
                 sb.seat_number,
                 sb.floor_number,
@@ -105,7 +106,7 @@ import {
     }
   
     async findOne(id: number) {
-      const [rows]: any = await this.pool.query(
+      const rows: any = await this.databaseService.query(
         `SELECT sb.booking_id,
                 sb.seat_number,
                 sb.floor_number,
@@ -157,7 +158,7 @@ import {
     // }
 
     async update(id: number, dto: UpdateSeatBookingDto) {
-        const conn = await this.pool.getConnection();
+        const conn = await this.databaseService.getConnection();
         try {
           await conn.beginTransaction();
       
@@ -247,7 +248,7 @@ import {
       }
   
     async remove(id: number) {
-      const conn = await this.pool.getConnection();
+      const conn = await this.databaseService.getConnection();
       try {
         await conn.beginTransaction();
   

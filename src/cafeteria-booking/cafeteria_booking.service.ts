@@ -4,26 +4,12 @@ import { CheckCafeAvailabilityDto } from './dto/check-availability.dto';
 import { CreateCafeteriaBookingDto } from './dto/create-cafeteria_booking.dto';
 import * as mysql from 'mysql2/promise';
 import { UpdateCafeteriaBookingDto } from './dto/update-cafeteria_booking.dto';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class CafeteriaBookingService {
-  private pool: mysql.Pool;
 
-  constructor() {
-    const port = process.env.DB_PORT
-      ? parseInt(process.env.DB_PORT, 10)
-      : undefined;
-
-      this.pool = mysql.createPool({
-        host: '127.0.0.1',
-        port: 3306,
-        user: 'root',
-        password: 'Utkarsh321',
-        database: 'office_management',
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-      });
+  constructor(private databaseService: DatabaseService) {
   }
 
   /**
@@ -38,7 +24,7 @@ export class CafeteriaBookingService {
 
     await this.assertAvailable(dto.cafe_name, mysqlDateStr);
       // the first one is our SELECT at the end of the proc.
-      const [rows] = await this.pool.query(
+      const [rows] = await this.databaseService.query(
         'CALL BookCafe(?, ?, ?, ?)',
         [userId, dto.cafe_name, mysqlDateStr, dto.details],
       );
@@ -68,7 +54,7 @@ export class CafeteriaBookingService {
          sql += ' AND b.booking_id <> ?';
          params.push(excludeBookingId);
        }
-       const [rows] = await this.pool.execute<RowDataPacket[]>(sql, params);
+       const [rows] = await this.databaseService.execute<RowDataPacket[]>(sql, params);
        if ((rows[0]?.cnt as number) > 0) {
          throw new ConflictException('That café slot is already booked');
        }
@@ -117,7 +103,7 @@ export class CafeteriaBookingService {
     params.push(bookingId, dto.user_id);
 
     try {
-      const [res] = await this.pool.execute<ResultSetHeader>(sql, params);
+      const [res] = await this.databaseService.execute<ResultSetHeader>(sql, params);
       if (res.affectedRows === 0) {
         throw new NotFoundException(
           'Booking not found or you are not the owner',
@@ -137,7 +123,7 @@ export class CafeteriaBookingService {
   async isAvailable(dto: CheckCafeAvailabilityDto) {
     try {
 
-      const [rows] = await this.pool.execute<RowDataPacket[]>(
+      const [rows] = await this.databaseService.execute<RowDataPacket[]>(
         `
         SELECT COUNT(*) AS cnt
           FROM Booking b
@@ -162,7 +148,7 @@ export class CafeteriaBookingService {
   // If you have other stored‑procs you want to call, e.g. to cancel:
   async cancelBooking(bookingId: number, userId: number) {
     try {
-      const [rows] = await this.pool.query(
+      const [rows] = await this.databaseService.query(
         'CALL CancelBooking(?, ?)',
         [bookingId, userId],
       );
@@ -176,7 +162,7 @@ export class CafeteriaBookingService {
   async getCafes(): Promise<
     { name: string; cuisine: string; contact_number: string; floor_number: number }[]
   > {
-    const [rows] = await this.pool.execute<RowDataPacket[]>(
+    const [rows] = await this.databaseService.execute<RowDataPacket[]>(
       `SELECT name, cuisine, contact_number, floor_number FROM Cafe`
     );
     return rows as any;
@@ -190,7 +176,7 @@ export class CafeteriaBookingService {
       details: string;
     }[]
   > {
-    const [rows] = await this.pool.execute<RowDataPacket[]>(
+    const [rows] = await this.databaseService.execute<RowDataPacket[]>(
       `
       SELECT b.booking_id,
              cb.cafe_name,

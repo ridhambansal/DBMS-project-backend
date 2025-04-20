@@ -11,9 +11,9 @@ export class FloorController {
   }
 
   @Get(':floor_number/seats/available')
-  async getAvailableSeats(
+  getAvailableSeats(
     @Param('floor_number') floor: string,
-  ) {
+  ): Promise<{ seat_number: number }[]> {
     const floorNum = parseInt(floor, 10);
     return this.svc.getAvailableSeats(floorNum);
   }
