@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { SeatBookingModule } from './seat-booking/seat-booking.module';
 import { FloorModule } from './floor/floor.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { AdminCafeModule } from './admin/cafe/admin-cafe.module';
 import { AdminFloorModule } from './admin/floor/admin-floor.module';
 import { AdminMeetingRoomModule } from './admin/meeting-room/admin-meeting-room.module';
@@ -28,9 +29,10 @@ import { AdminMeetingRoomModule } from './admin/meeting-room/admin-meeting-room.
     CafeteriaBookingModule,
     SeatBookingModule,
     FloorModule,
+    NotificationsModule,
     AdminFloorModule,
     AdminMeetingRoomModule,
-    AdminCafeModule
+    AdminCafeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
