@@ -29,12 +29,11 @@ export class AuthService {
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    
     // Insert new user
     const result = await this.databaseService.query(
       'INSERT INTO User (first_name, last_name, email_id, password, company, access_level_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [first_name, last_name, email_id, hashedPassword, company, access_level_id]
+      [first_name, last_name, email_id, password, company, access_level_id]
     );
 
     // Get the newly created user
