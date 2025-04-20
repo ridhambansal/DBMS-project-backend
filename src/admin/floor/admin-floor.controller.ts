@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Param, Put } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Param, Put, Get } from '@nestjs/common';
 import { AdminGuard } from '../../auth/admin.guard';
 import { CreateAdminFloorDto } from './dto/create-admin-floor.dto';
 import { AdminFloorService } from './admin-floor.service';
@@ -21,5 +21,10 @@ export class AdminFloorController {
     @Body() dto: UpdateAdminFloorDto,
   ) {
     return this.svc.update(+floorNumber, dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.svc.findAll();
   }
 }

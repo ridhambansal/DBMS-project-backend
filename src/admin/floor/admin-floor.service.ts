@@ -70,4 +70,21 @@ export class AdminFloorService {
       ...dto,
     };
   }
+
+  async findAll(): Promise<Array<{
+    floor_number: number;
+    floor_name: string;
+    total_capacity: number;
+  }>> {
+    const rows: any[] = await this.databaseService.query(
+      `SELECT floor_number, floor_name, total_capacity
+         FROM \`Floor\``,
+      [],
+    );
+    return rows.map(r => ({
+      floor_number:   r.floor_number,
+      floor_name:     r.floor_name,
+      total_capacity: r.total_capacity,
+    }));
+  }
 }
