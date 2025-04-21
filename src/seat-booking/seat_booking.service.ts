@@ -290,6 +290,7 @@ import { DatabaseService } from 'src/database/database.service';
         SELECT
           b.booking_id,
           sb.seat_number,
+          sb.floor_number,
           b.booking_date,
           b.details
         FROM Booking b
